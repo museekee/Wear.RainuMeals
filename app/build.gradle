@@ -48,6 +48,8 @@ android {
 }
 
 dependencies {
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
     implementation "com.google.android.horologist:horologist-compose-layout:0.5.10"
     implementation "androidx.compose.foundation:foundation-android:1.6.0-beta01"
     implementation 'androidx.core:core-ktx:1.12.0'

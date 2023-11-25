@@ -1,13 +1,84 @@
 package kr.museekee.rainu.wear.rainumeals.presentation.libs
 
-class Meals {
-    private val testMeals = arrayOf("기장밥 \n나가사키짬뽕 (5.6.9.10.13.17)\n무말랭이무침 (5.6.13)\n양념치킨 (5.6.12.13.15)\n배추김치 (9)\n천혜향 ","김가루밥 (5.6.13)\n온메밀소바 (3.5.6.13)\n꼬들단무지 (1.2.5.6.9.13.16.18)\n감자크로켓+케첩 (1.5.6.12)\n배추김치 (9)\n바나나우유 (2)","흑미밥 \n김치만두전골 (1.5.6.10.16.18)\n궁중떡볶음 (5.6.13.16)\n삼치카레구이 (2.5.6.12.13.16.18)\n배추김치 (9)\n붕어빵(밀크) (1.2.5.6)","현미밥 \n조랭이떡국 (1.5.6)\n미역줄기볶음 \n부대볶음 (1.2.5.6.10.12.13.15.16.18)\n배추김치 (9)\n자몽쥬스 (13)","현미밥 \n얼갈이된장국 (5.6)\n영양부추무침 (13)\n오리훈제구이 (1.5.6.13)\n배추김치 (9)\n배 \n무쌈 ","스팸김치볶음밥 (1.2.5.6.9.10.13)\n파송송달걀국 (1.5.6)\n시금치무침 \n나박김치 (9)\n회오리감자 (5.6)\n한라봉쥬스 (13)","쇠고기자장밥 (5.6.13.16)\n단무지 \n레몬크림새우 (1.2.5.6.9.13)\n배추김치 (9)\n멜론 ","킹용가리마요덮밥 (1.2.5.6.13.15)\n순두부찌개 (5.6.10.18)\n아몬드멸치볶음 (13)\n깍두기 (9)\n사과쥬스 (13)\n소떡소떡(안일) (5.6.10.12.13.15)","흑미밥 \n설렁탕 (5.6.16)\n매콤어묵꼬치 (1.5.6.13)\n한우메추리알조림 (1.5.6.13.16)\n오이지무침 \n석박지 (9)","나물비빔밥 (5.6)\n맑은부추국 (5.6)\n배추김치 (9)\n샤인머스켓 \n왕닭다리바베큐구이 (5.6.12.13.15)","소고기야채죽 (5.6.16)\n몬테크리스토 (1.2.5.6)\n진미채조림 (13.17)\n배추김치 (9)\n초코우유 (2)\n무장아찌무침 ","차수수밥 \n우동장국 (1.2.5.6.9.13)\n야채쫄면무침 (5.6.13)\n수제포크커틀렛 ….2.5.6.10)\n깍두기 (9)\n데미브라운소스 (2.5.6.12.13.16.18)\n귤 ","기장밥 \n쇠고기무국 (5.6.16)\n상추치커리무침 (5.6.13)\n콘치즈매콤바싹불고기 (1.2.5.13.16)\n배추김치 (9)\n캐플쥬스 ","보리밥 \n고기듬뿍김치찌개 (9.10)\n잡채어묵볶음 (1.5.6.13)\n고등어데리야키구이 (5.6.7.13)\n깍두기 (9)\n마카롱 (1.2.6)","옥수수밥 \n유부된장국 (5.6)\n폭찹스테이크 (2.5.6.10.12.13.16.18)\n웻지감자구이 (2.5.12)\n총각김치 (9)\n바나나 ","카레라이스 (2.5.6.10.12.13.16.18)\n모듬피클 \n야채춘권 (1.5.6.10.12.13.15)\n배추김치 (9)\n딸기라씨 (2.13)","현미밥 \n육개장 (5.6.16)\n오이부추무침 (13)\n피쉬앤칩스 (1.2.5.6.13)\n깍두기 (9)\n코코넛음료수 ","보리밥 \n쇠고기떡국 (5.6.16)\n닭김치조림 (5.6.9.13.15)\n건파래깨볶음 (13)\n깍두기 (9)\n망고스틱 ","흑미밥 \n미역국 (5.6)\n깍두기 (9)\n아이스크림(배라) (1.2.5)\n돈수육/쌈장 (5.6.10.13)\n채소구이 \n깻잎 ","혼합곡밥 (5)\n매콤콩나물국 (5.6)\n떡갈비데리야키조림 (2.5.6.10.13.16)\n달걀말이 (1.12)\n열무김치 (9)\n요플레 (2.11)","양송이스프 (2.5.6.13)\n오이피클 \n과일모듬샐러드 (2.13)\n소고기스파게티 (1.2.5.6.12.13.16)\n크룽지 (1.2.5.6)\n라임레몬쥬스 (13)")
+import androidx.compose.ui.util.fastMap
+import org.json.JSONObject
+import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.QueryMap
+import retrofit2.http.Url
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-    fun get(): List<String> {
-        val res = mutableListOf<String>()
-        for (meal in testMeals) {
-            res += "\\((?:\\d+\\.?)+\\)".toRegex().replace(meal, "")
+class Meals {
+    companion object {
+        private val allergies = listOf("난류", "우유", "메밀", "땅콩", "대두", "밀"," 고등어", "게", "새우", "돼지고기", "복숭아", "토마토", "아황산류", "호두", "닭고기", "소고기", "오징어", "조개류", "잣")
+
+        fun allergyToKorean(al: Int): String {
+            return allergies[al-1]
         }
-        return res
     }
+
+    suspend fun get(): List<TMeal> {
+        val neisMeals = getNeisMeals(
+            key = "8461581b65424dca9fe5613afa5870b6",
+            schoolCode = 7631122
+        )
+        return neisMeals
+    }
+
+    private suspend fun getNeisMeals(
+        key: String,
+        schoolCode: Int
+    ): List<TMeal> {
+        val params = mutableMapOf<String, String>()
+        params += "key" to key
+        params += "type" to "json"
+        params += "ATPT_OFCDC_SC_CODE" to "J10"
+        params += "SD_SCHUL_CODE" to schoolCode.toString()
+        params += "MLSV_YMD" to "${LocalDate.now().year}${LocalDate.now().monthValue}"
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://open.neis.go.kr/")
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .build()
+
+        val apiService = retrofit.create(Request::class.java)
+
+        val body = apiService.get("/hub/mealServiceDietInfo", params)
+
+        if (JSONObject(body).optJSONArray("mealServiceDietInfo") == null) return listOf()
+        val data = JSONObject(body).getJSONArray("mealServiceDietInfo").getJSONObject(1).optJSONArray("row")
+
+        val result: MutableList<TMeal> = mutableListOf()
+
+        if (data != null) {
+            for (idx in 0 until data.length()) {
+                val nowData = data.getJSONObject(idx)
+                val meals = nowData.getString("DDISH_NM").split("<br/>")
+                val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+                val allergies = meals.map { meal ->
+                    ("\\((?:\\d+\\.?)+\\)".toRegex().find(meal)?.value
+                        ?.replace("(", "")?.replace(")", "")
+                        ?.split(".") ?: listOf()).fastMap {
+                            it.toInt()
+                    }
+                }
+                val mealInfo = TMeal(
+                    cooks = meals.map { "\\((?:\\d+\\.?)+\\)".toRegex().replace(it, "") },
+                    date = LocalDate.parse(nowData.getString("MLSV_YMD"), formatter),
+                    kiloCalories = nowData.getString("CAL_INFO").substring(0, nowData.getString("CAL_INFO").length - 6).toDouble(),
+                    allergies = allergies
+                )
+                result += (mealInfo)
+            }
+        }
+
+        return result
+    }
+}
+
+interface Request {
+    @GET
+    suspend fun get(@Url url: String, @QueryMap queryMap: Map<String, String>): String
 }
