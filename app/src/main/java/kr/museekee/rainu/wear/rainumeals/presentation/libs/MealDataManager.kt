@@ -1,28 +1,28 @@
 package kr.museekee.rainu.wear.rainumeals.presentation.libs
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlin.properties.ReadOnlyProperty
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
-class MealDataManager(
-    private val dataStore: DataStore<Preferences>
-) {
+class MealDataManager {
     companion object {
-        val MEAL_DATA = stringPreferencesKey("MEAL_DATA")
-    }
-
-    suspend fun storeMeal(
-        data: String
-    ) {
-        dataStore.edit {
-            it[MEAL_DATA] = data
+        fun storeMeals(context: Context, date: String, data: List<TMeal>) {
+            val sharedPreference = context.getSharedPreferences("meals", MODE_PRIVATE)
+            val editor: SharedPreferences.Editor = sharedPreference.edit()
+            editor.putString(date, Json.encodeToString(data))
+            editor.apply()
         }
-    }
-
-    val mealDataFlow: Flow<String?> = dataStore.data.map {
-        it[MEAL_DATA]
+        fun getMeals(context: Context, date: String): List<TMeal> {
+            val sharedPreference = context.getSharedPreferences("meals", MODE_PRIVATE)
+            return Json.decodeFromString(sharedPreference.getString(date, "[]") ?: "[]") ?: listOf()
+        }
+        fun existMeals(context: Context, date: String): Boolean {
+            val sharedPreference = context.getSharedPreferences("meals", MODE_PRIVATE)
+            val sd = sharedPreference.getString(date, "").toString()
+            return sd != ""
+        }
     }
 }
