@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,7 +52,10 @@ import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Text
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import kr.museekee.rainu.wear.rainumeals.R
 import kr.museekee.rainu.wear.rainumeals.presentation.libs.Meals
 import kr.museekee.rainu.wear.rainumeals.presentation.libs.TMeal
@@ -72,10 +76,14 @@ fun WearApp() {
     val meals = remember {
         mutableStateListOf<TMeal>()
     }
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
-        meals += Meals().get()
+        Meals().get(context).collectLatest {
+            if (it != null) {
+                meals += Json.decodeFromString<List<TMeal>>(it)
+            }
+        }
     }
-
     val pagerState = rememberPagerState { meals.size }
     var finalValue by remember { mutableStateOf(0) }
     val animatedSelectedPage by animateFloatAsState(
@@ -124,6 +132,8 @@ fun WearApp() {
                 val date = meal.date
                 val cooks = meal.cooks
                 val allergies = meal.allergies
+                Log.d("aaa", meal.cooks.joinToString(", "))
+
                 Column(
                     modifier = Modifier
                         .padding(5.dp),
