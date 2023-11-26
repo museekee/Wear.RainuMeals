@@ -7,11 +7,13 @@
 package kr.museekee.rainu.wear.rainumeals.presentation
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,12 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,13 +44,12 @@ import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.rememberActiveFocusRequester
 import androidx.wear.compose.material.HorizontalPageIndicator
-import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.PageIndicatorState
 import androidx.wear.compose.material.PageIndicatorStyle
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Text
 import kotlinx.coroutines.launch
-import kr.museekee.rainu.wear.rainumeals.R
+import kr.museekee.rainu.wear.rainumeals.presentation.libs.MealDataManager
 import kr.museekee.rainu.wear.rainumeals.presentation.libs.Meals
 import kr.museekee.rainu.wear.rainumeals.presentation.libs.TMeal
 import kr.museekee.rainu.wear.rainumeals.presentation.theme.RainuMealsTheme
@@ -134,17 +134,29 @@ fun WearApp() {
                             .fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        items(cooks.size) {
-                            Column {
+                        items(cooks.size) { cookIdx ->
+                            var isFavorite by remember { mutableStateOf(MealDataManager.existFavorite(context, cooks[cookIdx])) }
+                            Column(
+                                modifier = Modifier
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(
+                                            onDoubleTap = {
+                                                isFavorite = !MealDataManager.toggleFavorite(context, cooks[cookIdx])
+                                                Log.d("dd", "따블 클릭")
+                                            }
+                                        )
+                                    }
+                            ) {
                                 Text(
-                                    text = cooks[it],
+                                    text = cooks[cookIdx],
                                     modifier = Modifier
                                         .fillMaxWidth(),
                                     textAlign = TextAlign.Center,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isFavorite) Color(0xffff0000) else Color(0xffffffff)
                                 )
                                 Text(
-                                    text = allergies[it].joinToString(", ") {
+                                    text = allergies[cookIdx].joinToString(", ") {
                                         Meals.allergyToKorean(it)
                                     },
                                     modifier = Modifier
@@ -166,17 +178,7 @@ fun WearApp() {
     }
 }
 
-@Composable
-fun Greeting(greetingName: String) {
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colors.primary,
-        text = stringResource(R.string.hello_world, greetingName)
-    )
-}
-
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
+@Preview(showSystemUi = true)
 @Composable
 fun DefaultPreview() {
     WearApp()

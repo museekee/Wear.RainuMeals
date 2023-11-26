@@ -24,5 +24,23 @@ class MealDataManager {
             val sd = sharedPreference.getString(date, "").toString()
             return sd != ""
         }
+
+        fun toggleFavorite(context: Context, cook: String): Boolean {
+            val sharedPreference = context.getSharedPreferences("favorite_meals", MODE_PRIVATE)
+            val editor: SharedPreferences.Editor = sharedPreference.edit()
+
+            if (existFavorite(context, cook))
+                editor.putBoolean(cook, false)
+            else
+                editor.putBoolean(cook, true)
+
+            editor.apply()
+
+            return !existFavorite(context, cook)
+        }
+        fun existFavorite(context: Context, cook: String): Boolean {
+            val sharedPreference = context.getSharedPreferences("favorite_meals", MODE_PRIVATE)
+            return sharedPreference.getBoolean(cook, false)
+        }
     }
 }
