@@ -23,7 +23,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -66,14 +65,19 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalFoundationApi::class, ExperimentalWearFoundationApi::class)
 @Composable
 fun WearApp() {
-    val meals = remember {
-        mutableStateListOf<TMeal>()
-    }
+    var meals by remember { mutableStateOf(listOf<TMeal>()) }
     val context = LocalContext.current
+//    val today = LocalDate.now()
+//    var aroundDate by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) {
-        meals += Meals().get(context)
+        val loadedMeals = Meals().get(context)
+        meals = loadedMeals
     }
-    val pagerState = rememberPagerState { meals.size }
+//    aroundDate = meals.indexOfFirst { it.date.isAfter(today) || it.date.isEqual(today) }
+//    Log.d("aaa", aroundDate.toString())
+    val pagerState = rememberPagerState (
+//        initialPage = if (aroundDate == -1) 0 else aroundDate
+    ) { meals.size }
     var finalValue by remember { mutableStateOf(0) }
     val animatedSelectedPage by animateFloatAsState(
         targetValue = pagerState.currentPage.toFloat(),
@@ -136,6 +140,7 @@ fun WearApp() {
                     ) {
                         items(cooks.size) { cookIdx ->
                             var isFavorite by remember { mutableStateOf(MealDataManager.existFavorite(context, cooks[cookIdx])) }
+
                             Column(
                                 modifier = Modifier
                                     .pointerInput(Unit) {
