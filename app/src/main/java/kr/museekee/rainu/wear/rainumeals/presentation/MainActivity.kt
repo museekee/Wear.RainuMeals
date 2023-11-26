@@ -6,22 +6,24 @@
 
 package kr.museekee.rainu.wear.rainumeals.presentation
 
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,16 +44,24 @@ import androidx.compose.ui.unit.sp
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.rememberActiveFocusRequester
+import androidx.wear.compose.material.Chip
+import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.HorizontalPageIndicator
 import androidx.wear.compose.material.PageIndicatorState
 import androidx.wear.compose.material.PageIndicatorStyle
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Text
+import androidx.wear.compose.material.dialog.Alert
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kr.museekee.rainu.wear.rainumeals.presentation.libs.MealDataManager
 import kr.museekee.rainu.wear.rainumeals.presentation.libs.Meals
-import kr.museekee.rainu.wear.rainumeals.presentation.libs.TMeal
 import kr.museekee.rainu.wear.rainumeals.presentation.theme.RainuMealsTheme
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,22 +72,74 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Composable
+fun DownloadAlert(context: Context, date: String, onClick: () -> Unit) {
+    val today = LocalDate.now()
+    var isDownloading by remember { mutableStateOf(false) }
+
+    Alert(
+        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Top),
+        contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 24.dp, bottom = 52.dp),
+        title = {
+            Text("${today.monthValue}월 급식 다운로드")
+        },
+        message = {
+            Text("나이스에서 ${today.monthValue}월의 급식을 받아옵니다.")
+        },
+        backgroundColor = Color.Black,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        item {
+            Chip(
+                label = { Text(if (!isDownloading) "다운로드" else "다운로드 중") },
+                enabled = !isDownloading,
+                onClick = {
+                    val coroutineScope = CoroutineScope(Dispatchers.Main)
+                    coroutineScope.launch {
+                        isDownloading = true
+                        MealDataManager.storeMeals(
+                            context = context,
+                            date = date,
+                            data = Meals().getNeisMeals(
+                                key = "8461581b65424dca9fe5613afa5870b6",
+                                schoolCode = 7631122
+                            )
+                        )
+                        onClick()
+                    }
+                },
+                colors = ChipDefaults.primaryChipColors(),
+            )
+        }
+        item {
+            Chip(
+                label = { Text("나가기") },
+                onClick = {
+                    val activity = (context as? Activity)
+                    activity?.finish()
+                },
+                colors = ChipDefaults.secondaryChipColors(),
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class, ExperimentalWearFoundationApi::class)
 @Composable
-fun WearApp() {
-    var meals by remember { mutableStateOf(listOf<TMeal>()) }
-    val context = LocalContext.current
-//    val today = LocalDate.now()
-//    var aroundDate by remember { mutableStateOf(0) }
-    LaunchedEffect(Unit) {
-        val loadedMeals = Meals().get(context)
-        meals = loadedMeals
-    }
-//    aroundDate = meals.indexOfFirst { it.date.isAfter(today) || it.date.isEqual(today) }
-//    Log.d("aaa", aroundDate.toString())
+fun MealsMain(context: Context) {
+    val meals = Meals().get(context)
+
+    val today = OffsetDateTime.of(LocalDateTime.now(), ZoneOffset.of("+9")).toLocalDate()
+
+    var aroundDate by remember { mutableStateOf(0) }
+
+    aroundDate = meals.indexOfFirst { it.date.isAfter(today) || it.date.isEqual(today) }
+
     val pagerState = rememberPagerState (
-//        initialPage = if (aroundDate == -1) 0 else aroundDate
-    ) { meals.size }
+        pageCount = { meals.size },
+        initialPage = if (aroundDate == -1) 0 else aroundDate
+    )
     var finalValue by remember { mutableStateOf(0) }
     val animatedSelectedPage by animateFloatAsState(
         targetValue = pagerState.currentPage.toFloat(),
@@ -105,6 +167,7 @@ fun WearApp() {
             val coroutineScope = rememberCoroutineScope()
             val focusRequester = rememberActiveFocusRequester()
 
+
             HorizontalPager(
                 modifier = Modifier
                     .onRotaryScrollEvent {
@@ -118,7 +181,6 @@ fun WearApp() {
                     }
                     .focusRequester(focusRequester)
                     .focusable(),
-//                beyondBoundsPageCount = 35,
                 state = pagerState
             ) { page ->
                 val meal = meals[page]
@@ -131,7 +193,20 @@ fun WearApp() {
                         .padding(5.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("${date.monthValue}월 ${date.dayOfMonth}일")
+                    /*
+                    Button(onClick = {
+                        val sharedPreference = context.getSharedPreferences("meals", Context.MODE_PRIVATE)
+                        val editor: SharedPreferences.Editor = sharedPreference.edit()
+                        editor.clear().apply()
+                    }) {
+                        Text("제거")
+                    }
+                    */ // 급식 정보 제거
+                    Text(
+                        text = "${date.monthValue}월 ${date.dayOfMonth}일",
+                        color = if (date.dayOfMonth == today.dayOfMonth) Color(0xFFFF6D60) else Color.White,
+                        fontWeight = if (date.dayOfMonth == today.dayOfMonth) FontWeight.Bold else FontWeight.Normal
+                    )
 
                     ScalingLazyColumn(
                         modifier = Modifier
@@ -147,7 +222,6 @@ fun WearApp() {
                                         detectTapGestures(
                                             onDoubleTap = {
                                                 isFavorite = !MealDataManager.toggleFavorite(context, cooks[cookIdx])
-                                                Log.d("dd", "따블 클릭")
                                             }
                                         )
                                     }
@@ -158,7 +232,7 @@ fun WearApp() {
                                         .fillMaxWidth(),
                                     textAlign = TextAlign.Center,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isFavorite) Color(0xffff0000) else Color(0xffffffff)
+                                    color = if (isFavorite) Color(0xFFFF6D60) else Color(0xffffffff)
                                 )
                                 Text(
                                     text = allergies[cookIdx].joinToString(", ") {
@@ -181,6 +255,21 @@ fun WearApp() {
             )
         }
     }
+}
+
+@Composable
+fun WearApp() {
+    var isDownloaded by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val dateKey = "${LocalDate.now().year}${LocalDate.now().monthValue}"
+
+    if (MealDataManager.existMeals(context, dateKey) || isDownloaded)
+        MealsMain(context)
+    else
+        DownloadAlert(context, dateKey) {
+            isDownloaded = true
+        }
 }
 
 @Preview(showSystemUi = true)

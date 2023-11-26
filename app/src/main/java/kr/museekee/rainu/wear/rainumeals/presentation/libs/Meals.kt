@@ -20,21 +20,12 @@ class Meals {
         }
     }
 
-    suspend fun get(context: Context): List<TMeal> {
+    fun get(context: Context): List<TMeal> {
         val date = "${LocalDate.now().year}${LocalDate.now().monthValue}"
-        if (!MealDataManager.existMeals(context, date))
-            MealDataManager.storeMeals(
-                context = context,
-                date = date,
-                data = getNeisMeals(
-                    key = "8461581b65424dca9fe5613afa5870b6",
-                    schoolCode = 7631122
-                )
-            )
         return MealDataManager.getMeals(context, date)
     }
 
-    private suspend fun getNeisMeals(
+    suspend fun getNeisMeals(
         key: String,
         schoolCode: Int
     ): List<TMeal> {
