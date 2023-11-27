@@ -20,9 +20,9 @@ class Meals {
         }
     }
 
-    fun get(context: Context): List<TMeal> {
+    fun get(context: Context, schoolCode: Int): List<TMeal> {
         val date = "${LocalDate.now().year}${LocalDate.now().monthValue}"
-        return MealDataManager.getMeals(context, date)
+        return MealDataManager.getMeals(context, schoolCode, date)
     }
 
     suspend fun getNeisMeals(
