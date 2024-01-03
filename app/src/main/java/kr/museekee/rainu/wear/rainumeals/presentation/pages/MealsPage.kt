@@ -53,7 +53,6 @@ fun MealsPage(context: Context, schoolCode: Int) {
         initialPage = if (aroundDate == -1) 0 else aroundDate
     )
     // endregion
-
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = rememberActiveFocusRequester()
 

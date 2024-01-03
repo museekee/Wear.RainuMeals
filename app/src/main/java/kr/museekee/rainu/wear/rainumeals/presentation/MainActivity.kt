@@ -8,6 +8,7 @@ package kr.museekee.rainu.wear.rainumeals.presentation
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -24,9 +25,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Scaffold
 import kr.museekee.rainu.wear.rainumeals.presentation.libs.MealDataManager
+import kr.museekee.rainu.wear.rainumeals.presentation.pages.AdvancedMenuPage
 import kr.museekee.rainu.wear.rainumeals.presentation.pages.DownloadAlert
 import kr.museekee.rainu.wear.rainumeals.presentation.pages.MealsPage
-import kr.museekee.rainu.wear.rainumeals.presentation.pages.AdvancedMenuPage
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
@@ -51,8 +52,9 @@ fun MealsMain(context: Context, schoolCode: Int) {
                 pageCount = { 2 }
             )
         ) { vPage ->
+            Log.d("vPage", vPage.toString())
             if (vPage == 0)
-                AdvancedMenuPage()
+                AdvancedMenuPage(context)
             else if (vPage == 1)
                 MealsPage(context, schoolCode)
         }
@@ -64,7 +66,7 @@ fun WearApp(schoolCode: Int) {
     var isDownloaded by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val dateKey = "${LocalDate.now().year}${LocalDate.now().monthValue}"
+    val dateKey = "${LocalDate.now().year}${LocalDate.now().monthValue.toString().padStart(2, '0')}"
 
     if (MealDataManager.existMeals(context, schoolCode, dateKey) || isDownloaded)
         MealsMain(context, schoolCode)

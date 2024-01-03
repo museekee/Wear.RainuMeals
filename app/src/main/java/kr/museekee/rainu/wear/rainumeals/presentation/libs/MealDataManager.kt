@@ -9,6 +9,12 @@ import kotlinx.serialization.json.Json
 
 class MealDataManager {
     companion object {
+        fun resetMeals(context: Context, schoolCode: Int, date: String) {
+            val sharedPreference = context.getSharedPreferences("${schoolCode}_meals", MODE_PRIVATE)
+            val editor: SharedPreferences.Editor = sharedPreference.edit()
+            editor.putString(date, "")
+            editor.apply()
+        }
         fun storeMeals(context: Context, schoolCode: Int, date: String, data: List<TMeal>) {
             val sharedPreference = context.getSharedPreferences("${schoolCode}_meals", MODE_PRIVATE)
             val editor: SharedPreferences.Editor = sharedPreference.edit()

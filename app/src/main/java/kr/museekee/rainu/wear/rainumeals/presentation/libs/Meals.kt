@@ -21,7 +21,7 @@ class Meals {
     }
 
     fun get(context: Context, schoolCode: Int): List<TMeal> {
-        val date = "${LocalDate.now().year}${LocalDate.now().monthValue}"
+        val date = "${LocalDate.now().year}${LocalDate.now().monthValue.toString().padStart(2, '0')}"
         return MealDataManager.getMeals(context, schoolCode, date)
     }
 
@@ -34,7 +34,7 @@ class Meals {
         params += "type" to "json"
         params += "ATPT_OFCDC_SC_CODE" to "J10"
         params += "SD_SCHUL_CODE" to schoolCode.toString()
-        params += "MLSV_YMD" to "${LocalDate.now().year}${LocalDate.now().monthValue}"
+        params += "MLSV_YMD" to "${LocalDate.now().year}${LocalDate.now().monthValue.toString().padStart(2, '0')}"
 
         val retrofit = Retrofit.Builder()
             .baseUrl("https://open.neis.go.kr/")
@@ -78,7 +78,6 @@ class Meals {
 //                result.put(jso)
             }
         }
-
         return result
     }
 }
