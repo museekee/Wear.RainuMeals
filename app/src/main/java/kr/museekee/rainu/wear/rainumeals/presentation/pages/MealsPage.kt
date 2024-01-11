@@ -26,9 +26,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.rememberActiveFocusRequester
+import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Text
 import kotlinx.coroutines.launch
 import kr.museekee.rainu.wear.rainumeals.presentation.libs.MealDataManager
@@ -39,7 +41,7 @@ import java.time.ZoneOffset
 
 @OptIn(ExperimentalWearFoundationApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun MealsPage(context: Context, schoolCode: Int) {
+fun MealsPage(context: Context, schoolCode: Int, navController: NavController) {
     val meals = Meals().get(context, schoolCode)
 
     // region 첫 화면 날짜 관련
@@ -50,7 +52,7 @@ fun MealsPage(context: Context, schoolCode: Int) {
     // region 페이지 관련
     val pagerState = rememberPagerState (
         pageCount = { meals.size },
-        initialPage = if (aroundDate == -1) 0 else aroundDate
+        initialPage = (if (aroundDate == -1) 0 else aroundDate) + 1 // 첫 페이지가 메뉴 페이지라서 1 더함
     )
     // endregion
     val coroutineScope = rememberCoroutineScope()
@@ -60,9 +62,9 @@ fun MealsPage(context: Context, schoolCode: Int) {
         modifier = Modifier
             .onRotaryScrollEvent {
                 coroutineScope.launch {
-                    if (it.verticalScrollPixels < 1)
+                    if (it.verticalScrollPixels < 1) {
                         pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                    else
+                    } else
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                 }
                 true
@@ -71,80 +73,101 @@ fun MealsPage(context: Context, schoolCode: Int) {
             .focusable(),
         state = pagerState
     ) { page ->
-        val meal = meals[page]
-        val date = meal.date
-        val cooks = meal.cooks
-        val allergies = meal.allergies
-
-        Column(
-            modifier = Modifier
-                .padding(5.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            /*
-            Button(onClick = {
-                val sharedPreference = context.getSharedPreferences("${schoolCode}_meals", Context.MODE_PRIVATE)
-                val editor: SharedPreferences.Editor = sharedPreference.edit()
-                editor.clear().apply()
-            }) {
-                Text("제거")
-            }
-            */ // 급식 정보 제거
-            Text(
-                text = "${date.monthValue}월 ${date.dayOfMonth}일",
-                color = if (date.dayOfMonth == today.dayOfMonth) Color(0xFFFF6D60) else Color.White,
-                fontWeight = if (date.dayOfMonth == today.dayOfMonth) FontWeight.Bold else FontWeight.Normal
-            )
-
-            ScalingLazyColumn(
+        if (page == 0) {
+            val btnCoroutineScope = rememberCoroutineScope()
+            Button(
                 modifier = Modifier
                     .fillMaxSize(),
+                onClick = {
+                    navController.navigate("menuPage")
+                    btnCoroutineScope.launch {
+                        pagerState.scrollToPage((if (aroundDate == -1) 0 else aroundDate) + 1)
+                    }
+                }
+            ) {
+                Text(
+                    textAlign = TextAlign.Center,
+                    fontSize = 30.sp,
+                    text = "메뉴"
+                )
+            }
+        }
+        else {
+            val meal = meals[page-1]
+            val date = meal.date
+            val cooks = meal.cooks
+            val allergies = meal.allergies
+
+            Column(
+                modifier = Modifier
+                    .padding(5.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                items(cooks.size) { cookIdx ->
-                    var isFavorite by remember {
-                        mutableStateOf(
-                            MealDataManager.existFavorite(
-                                context,
-                                cooks[cookIdx]
-                            )
-                        )
-                    }
+                /*
+                Button(onClick = {
+                    val sharedPreference = context.getSharedPreferences("${schoolCode}_meals", Context.MODE_PRIVATE)
+                    val editor: SharedPreferences.Editor = sharedPreference.edit()
+                    editor.clear().apply()
+                }) {
+                    Text("제거")
+                }
+                */ // 급식 정보 제거
+                Text(
+                    text = "${date.monthValue}월 ${date.dayOfMonth}일",
+                    color = if (date.dayOfMonth == today.dayOfMonth) Color(0xFFFF6D60) else Color.White,
+                    fontWeight = if (date.dayOfMonth == today.dayOfMonth) FontWeight.Bold else FontWeight.Normal
+                )
 
-                    Column(
-                        modifier = Modifier
-                            .pointerInput(Unit) {
-                                detectTapGestures(
-                                    onDoubleTap = {
-                                        isFavorite =
-                                            !MealDataManager.toggleFavorite(
-                                                context,
-                                                cooks[cookIdx]
-                                            )
-                                    }
+                ScalingLazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(cooks.size) { cookIdx ->
+                        var isFavorite by remember {
+                            mutableStateOf(
+                                MealDataManager.existFavorite(
+                                    context,
+                                    cooks[cookIdx]
                                 )
-                            }
-                    ) {
-                        Text(
-                            text = cooks[cookIdx],
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isFavorite) Color(0xFFFF6D60) else Color(
-                                0xffffffff
                             )
-                        )
-                        Text(
-                            text = allergies[cookIdx].joinToString(", ") {
-                                Meals.allergyToKorean(it)
-                            },
+                        }
+
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            fontSize = 10.sp,
-                            color = Color(0xffbbbbbb)
-                        )
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onDoubleTap = {
+                                            isFavorite =
+                                                !MealDataManager.toggleFavorite(
+                                                    context,
+                                                    cooks[cookIdx]
+                                                )
+                                        }
+                                    )
+                                }
+                        ) {
+                            Text(
+                                text = cooks[cookIdx],
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isFavorite) Color(0xFFFF6D60) else Color(
+                                    0xffffffff
+                                )
+                            )
+                            Text(
+                                text = allergies[cookIdx].joinToString(", ") {
+                                    Meals.allergyToKorean(it)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                fontSize = 10.sp,
+                                color = Color(0xffbbbbbb)
+                            )
+                        }
                     }
                 }
             }

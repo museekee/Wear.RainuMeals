@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ChipDefaults
@@ -23,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kr.museekee.rainu.wear.rainumeals.presentation.libs.MealDataManager
 import kr.museekee.rainu.wear.rainumeals.presentation.libs.Meals
+import kr.museekee.rainu.wear.rainumeals.presentation.libs.SchoolListManager
 import java.time.LocalDate
 
 @Composable
@@ -34,7 +36,10 @@ fun DownloadAlert(context: Context, date: String, schoolCode: Int, onClick: () -
         verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Top),
         contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 24.dp, bottom = 52.dp),
         title = {
-            Text("${today.monthValue}월 급식 다운로드")
+            Text(
+                textAlign = TextAlign.Center,
+                text = "${SchoolListManager.getSchoolNameByCode(context, schoolCode.toString())}\n${today.monthValue}월 급식 다운로드"
+            )
         },
         message = {
             Text("나이스에서 ${today.monthValue}월의 급식을 받아옵니다.")

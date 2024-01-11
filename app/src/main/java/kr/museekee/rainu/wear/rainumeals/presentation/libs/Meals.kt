@@ -48,7 +48,6 @@ class Meals {
         if (JSONObject(body).optJSONArray("mealServiceDietInfo") == null) return listOf()
         val data = JSONObject(body).getJSONArray("mealServiceDietInfo").getJSONObject(1).optJSONArray("row")
 
-//        val result = JSONArray()
         val result = mutableListOf<TMeal>()
 
         if (data != null) {
