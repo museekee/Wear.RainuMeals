@@ -10,7 +10,6 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -75,7 +74,6 @@ fun MyNavHost() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MealsMain(context: Context, schoolCode: Int, navController: NavController) {
     Scaffold(

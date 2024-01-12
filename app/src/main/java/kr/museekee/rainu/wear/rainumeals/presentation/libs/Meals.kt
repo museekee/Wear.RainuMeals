@@ -69,12 +69,6 @@ class Meals {
                     allergies = allergies
                 )
                 result += mealInfo
-//                val jso = JSONObject()
-//                jso.put("cooks", meals.map { "\\((?:\\d+\\.?)+\\)".toRegex().replace(it, "") })
-//                jso.put("date", LocalDate.parse(nowData.getString("MLSV_YMD"), formatter))
-//                jso.put("kiloCalories", nowData.getString("CAL_INFO").substring(0, nowData.getString("CAL_INFO").length - 6).toDouble())
-//                jso.put("allergies", allergies)
-//                result.put(jso)
             }
         }
         return result
