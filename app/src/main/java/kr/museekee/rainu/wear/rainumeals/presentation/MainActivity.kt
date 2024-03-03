@@ -93,13 +93,17 @@ fun WearApp(navController: NavController) {
 
     val nowSchoolCode = SchoolListManager.getNowSchool(context)
 
-    if (nowSchoolCode == "None") // 기본 학교 설정이 안 되어 있을 때
+    if (nowSchoolCode == "None" || SchoolListManager.getFavorites(context).isEmpty()) // 기본 학교 설정이 안 되어 있을 때
         SchoolSearchPage(context, navController) // 학교 찾아라
 
     else if (MealDataManager.existMeals(context, nowSchoolCode.toInt(), dateKey) || isDownloaded)
         MealsMain(context, nowSchoolCode.toInt(), navController)
     else
-        DownloadAlert(context, dateKey, nowSchoolCode.toInt()) {
+        DownloadAlert(context, dateKey, nowSchoolCode.toInt(), onSuccess = {
             isDownloaded = true
-        }
+        }, onFail = {
+            SchoolListManager.toggleFavorite(context, nowSchoolCode)
+            SchoolListManager.setNowSchool(context, "None")
+            isDownloaded = true // 리렌더링을 위한 구라
+        })
 }

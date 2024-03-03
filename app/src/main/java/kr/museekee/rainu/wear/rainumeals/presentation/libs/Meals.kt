@@ -8,6 +8,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.QueryMap
 import retrofit2.http.Url
+import java.lang.Exception
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -45,7 +46,7 @@ class Meals {
 
         val body = apiService.get("/hub/mealServiceDietInfo", params)
 
-        if (JSONObject(body).optJSONArray("mealServiceDietInfo") == null) return listOf()
+        if (JSONObject(body).optJSONArray("mealServiceDietInfo") == null) throw Exception("No Meal Data in school")
         val data = JSONObject(body).getJSONArray("mealServiceDietInfo").getJSONObject(1).optJSONArray("row")
 
         val result = mutableListOf<TMeal>()
@@ -71,6 +72,7 @@ class Meals {
                 result += mealInfo
             }
         }
+
         return result
     }
 }

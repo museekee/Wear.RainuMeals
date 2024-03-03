@@ -112,7 +112,7 @@ fun SchoolSearchResultItem(context: Context, schoolName: String, schoolCode: Int
                                 SchoolListManager.setNowSchool(context, schoolCode.toString()) // (처음으로 추가했을) 이걸 기본학교로 지정
                         },
                         onTap = {
-                            Log.d("schoolCode", schoolCode.toString())
+                            Log.d("schoolCode", schoolCode.toString()) // 그냥 급식 한 번 보는거 (근데 다음에도 볼 수 있으니 저장은 함)
                         }
                     )
                 },
