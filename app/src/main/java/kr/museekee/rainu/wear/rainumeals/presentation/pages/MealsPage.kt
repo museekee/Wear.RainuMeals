@@ -169,6 +169,16 @@ fun MealsPage(context: Context, schoolCode: Int, navController: NavController) {
                             )
                         }
                     }
+                    item {
+                        Text(
+                            text = "${meal.kiloCalories} kcal",
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFFFFFF)
+                        )
+                    }
                 }
             }
         }

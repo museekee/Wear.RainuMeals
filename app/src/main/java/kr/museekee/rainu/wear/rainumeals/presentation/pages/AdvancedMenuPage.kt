@@ -32,7 +32,8 @@ fun AdvancedMenuPage(context: Context, navController: NavController) {
                 Text (
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    text = "급식 메뉴 검색 (미완성)\n양 옆으로 슬라이드 해보세요"
+                    text = "양 옆으로 슬라이드 해보세요"
+//                            급식 메뉴 검색 (미완성)
                 )
             }
             2 -> SchoolSearchPage(
