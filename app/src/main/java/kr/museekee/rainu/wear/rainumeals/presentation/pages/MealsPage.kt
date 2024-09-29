@@ -51,7 +51,7 @@ fun MealsPage(context: Context, schoolCode: Int, navController: NavController) {
 
     // region 페이지 관련
     val pagerState = rememberPagerState (
-        pageCount = { meals.size },
+        pageCount = { meals.size + 1 }, // 메뉴 페이지 때문에 1 더하기
         initialPage = (if (aroundDate == -1) 0 else aroundDate) + 1 // 첫 페이지가 메뉴 페이지라서 1 더함
     )
     // endregion

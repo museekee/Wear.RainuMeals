@@ -29,7 +29,7 @@ class Schools {
         val result = mutableListOf<TSchool>()
 
         if (data != null) {
-            for (idx in 0 until data.length()) {
+            for (idx in 0..data.length()) {
                 val nowData = data.getJSONObject(idx)
                 result += TSchool(
                     name = nowData.getString("SCHUL_NM"),

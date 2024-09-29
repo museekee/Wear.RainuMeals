@@ -39,6 +39,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+//            MealDataManager.resetMeals(
+//                LocalContext.current,
+//                7631122,
+//                "202408"
+//            )
             MyNavHost()
         }
     }
